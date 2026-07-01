@@ -347,6 +347,54 @@ section[data-testid="stSidebar"] > div::-webkit-scrollbar-thumb:hover { backgrou
     width: 6px; height: 6px; background: var(--accent2);
     border-radius: 50%; animation: livePulse 1.5s ease-in-out infinite;
 }
+.agent-complete-toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 280px;
+    max-width: min(360px, calc(100vw - 32px));
+    padding: 14px 18px;
+    background: linear-gradient(135deg, var(--card1) 0%, var(--card2) 100%);
+    border: 1px solid color-mix(in srgb, var(--accent2) 38%, transparent);
+    border-radius: 14px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35), 0 0 24px color-mix(in srgb, var(--accent2) 12%, transparent);
+    animation: agentCompleteToast 2.6s ease forwards;
+    pointer-events: none;
+}
+.agent-complete-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    background: color-mix(in srgb, var(--accent2) 16%, transparent);
+    color: var(--accent2);
+    font-weight: 800;
+}
+.agent-complete-title {
+    color: var(--text-strong);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+.agent-complete-subtitle {
+    color: var(--text-mute);
+    font-size: 0.76rem;
+    line-height: 1.35;
+    margin-top: 2px;
+}
+@keyframes agentCompleteToast {
+    0% { opacity: 0; transform: translateX(120%) scale(0.98); }
+    12% { opacity: 1; transform: translateX(0) scale(1); }
+    78% { opacity: 1; transform: translateX(0) scale(1); }
+    100% { opacity: 0; transform: translateX(120%) scale(0.98); }
+}
 
 /* ── Agent Status ── */
 [data-testid="stStatusWidget"] {
@@ -632,20 +680,20 @@ HERO_HTML = """
     </div>
     <div style="color:var(--text-mute); font-size:1rem; max-width:520px; line-height:1.6;
                 text-shadow:0 2px 10px rgba(0,0,0,0.5);">
-      Four specialized agents collaborate in real-time to craft your perfect travel experience
+      Flight, hotel, weather, and itinerary checks run together to build a practical travel plan
     </div>
     <div style="display:flex; gap:40px; margin-top:30px;">
       <div style="text-align:center;">
-        <div style="font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--accent);">4</div>
-        <div style="font-size:0.7rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.1em; margin-top:2px;">AI Agents</div>
+        <div style="font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--accent);">Flights</div>
+        <div style="font-size:0.7rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.1em; margin-top:2px;">Route Options</div>
       </div>
       <div style="text-align:center;">
-        <div style="font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--accent);">∞</div>
-        <div style="font-size:0.7rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.1em; margin-top:2px;">Destinations</div>
+        <div style="font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--accent);">Hotels</div>
+        <div style="font-size:0.7rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.1em; margin-top:2px;">Stay Matches</div>
       </div>
       <div style="text-align:center;">
-        <div style="font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--accent);">24/7</div>
-        <div style="font-size:0.7rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.1em; margin-top:2px;">Available</div>
+        <div style="font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--accent);">Weather</div>
+        <div style="font-size:0.7rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.1em; margin-top:2px;">Forecast Context</div>
       </div>
     </div>
   </div>
@@ -1235,6 +1283,16 @@ if generate:
                         st.markdown(text or "_No itinerary generated._")
 
                     collected["llm_calls"] = state_update.get("llm_calls", collected["llm_calls"])
+
+        st.markdown("""
+        <div class="agent-complete-toast">
+            <div class="agent-complete-icon">✓</div>
+            <div>
+                <div class="agent-complete-title">Multi-agent planning complete</div>
+                <div class="agent-complete-subtitle">Your travel plan is ready to review.</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         # Metrics
         budget_display = html.escape(collected["total_budget"])

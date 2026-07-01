@@ -10,6 +10,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 AVIATION_MCP_DIR = BASE_DIR / "aviationstack-mcp"
+AVIATION_MCP_SRC = AVIATION_MCP_DIR / "src"
 WINDOWS_AVIATION_MCP_PYTHON = AVIATION_MCP_DIR / ".venv" / "Scripts" / "python.exe"
 POSIX_AVIATION_MCP_PYTHON = AVIATION_MCP_DIR / ".venv" / "bin" / "python"
 DEFAULT_AVIATION_MCP_PYTHON = (
@@ -25,7 +26,19 @@ AVIATION_MCP_PYTHON = os.getenv(
     "AVIATION_MCP_PYTHON",
     str(DEFAULT_AVIATION_MCP_PYTHON if DEFAULT_AVIATION_MCP_PYTHON.exists() else sys.executable)
 )
+WEATHER_MCP_PYTHON = os.getenv("WEATHER_MCP_PYTHON", sys.executable)
 WEATHER_MCP_SCRIPT = os.getenv("WEATHER_MCP_SCRIPT", str(BASE_DIR / "weather_mcp_server.py"))
+
+
+def build_mcp_env(extra_vars: dict[str, str]) -> dict[str, str]:
+    env = os.environ.copy()
+    env.update(extra_vars)
+    existing_pythonpath = env.get("PYTHONPATH", "")
+    pythonpath_parts = [str(AVIATION_MCP_SRC)]
+    if existing_pythonpath:
+        pythonpath_parts.append(existing_pythonpath)
+    env["PYTHONPATH"] = os.pathsep.join(pythonpath_parts)
+    return env
 
 client = MultiServerMCPClient(
      {
@@ -39,24 +52,22 @@ client = MultiServerMCPClient(
             "command": AVIATION_MCP_PYTHON,
             "args": [
                 "-m",
-                "aviationstack_mcp",
-                "mcp",
-                "run"
+                "aviationstack_mcp"
             ], 
-            "env": {
+            "env": build_mcp_env({
                 "AVIATIONSTACK_API_KEY": AVIATIONSTACK_API_KEY
-            }
+            })
         },
 
          "weather": {
             "transport": "stdio",
-            "command": AVIATION_MCP_PYTHON,
+            "command": WEATHER_MCP_PYTHON,
             "args": [
                 WEATHER_MCP_SCRIPT
             ],
-            "env": {
+            "env": build_mcp_env({
                 "OPENWEATHER_API_KEY": OPENWEATHER_API_KEY
-            }
+            })
         }
      }
 )

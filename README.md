@@ -23,8 +23,6 @@ python -m venv .venv
 
 ```powershell
 pip install -r requirements.txt
-pip install -r aviationstack-mcp\requirements.txt
-pip install -e aviationstack-mcp
 ```
 
 3. Copy the environment template and fill in your values.
@@ -44,7 +42,8 @@ Optional variables:
 
 - `DATABASE_URL`: Postgres connection string for persistent LangGraph checkpoints.
 - `USE_POSTGRES_CHECKPOINTER`: set to `true` only when `DATABASE_URL` is reachable from the app host.
-- `AVIATION_MCP_PYTHON`: Python executable used to run the aviation and weather MCP servers.
+- `AVIATION_MCP_PYTHON`: Python executable used to run the aviation MCP server.
+- `WEATHER_MCP_PYTHON`: Python executable used to run the weather MCP server.
 - `WEATHER_MCP_SCRIPT`: path to `weather_mcp_server.py` if you move it.
 
 ## Run

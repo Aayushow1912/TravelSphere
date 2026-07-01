@@ -6,6 +6,6 @@ langchain-groq
 langchain-mcp-adapters
 mcp[cli]
 psycopg[binary]
+pydantic>=2.0
 python-dotenv
 requests
-git+https://github.com/Pradumnasaraf/aviationstack-mcp.git
