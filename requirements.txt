@@ -8,3 +8,4 @@ mcp[cli]
 psycopg[binary]
 python-dotenv
 requests
+git+https://github.com/Pradumnasaraf/aviationstack-mcp.git

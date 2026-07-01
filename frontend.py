@@ -5,13 +5,39 @@ import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
 from langchain_core.messages import HumanMessage
-from main import app
 
 st.set_page_config(
     page_title="TravelSphere",
     page_icon="✈️",
     layout="wide"
 )
+
+
+def load_streamlit_secrets_to_env():
+    secret_keys = [
+        "AVIATIONSTACK_API_KEY",
+        "GROQ_API_KEY",
+        "TAVILY_API_KEY",
+        "TAVLIY_API_KEY",
+        "DATABASE_URL",
+        "OPENWEATHER_API_KEY",
+        "AVIATION_MCP_PYTHON",
+        "WEATHER_MCP_SCRIPT",
+    ]
+    try:
+        for key in secret_keys:
+            if key in st.secrets and not os.getenv(key):
+                os.environ[key] = str(st.secrets[key])
+    except Exception:
+        pass
+
+
+load_streamlit_secrets_to_env()
+
+from main import CHECKPOINTER_WARNING, app
+
+if CHECKPOINTER_WARNING:
+    st.warning(CHECKPOINTER_WARNING)
 
 
 def extract_total_budget(query: str) -> str:

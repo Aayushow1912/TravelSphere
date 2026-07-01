@@ -38,11 +38,12 @@ Required variables:
 - `AVIATIONSTACK_API_KEY`
 - `GROQ_API_KEY`
 - `TAVILY_API_KEY`
-- `DATABASE_URL`
 - `OPENWEATHER_API_KEY`
 
 Optional variables:
 
+- `DATABASE_URL`: Postgres connection string for persistent LangGraph checkpoints.
+- `USE_POSTGRES_CHECKPOINTER`: set to `true` only when `DATABASE_URL` is reachable from the app host.
 - `AVIATION_MCP_PYTHON`: Python executable used to run the aviation and weather MCP servers.
 - `WEATHER_MCP_SCRIPT`: path to `weather_mcp_server.py` if you move it.
 
@@ -55,5 +56,5 @@ streamlit run frontend.py
 ## Notes
 
 - `.env`, virtual environments, caches, and generated `travel_plans/` files are ignored by Git.
-- The app uses a PostgreSQL LangGraph checkpointer, so `DATABASE_URL` must point to a running database.
+- The app uses in-memory LangGraph checkpointing by default. Enable Postgres with `USE_POSTGRES_CHECKPOINTER=true`.
 - If you accidentally exposed real API keys before pushing, rotate them before publishing the repository.

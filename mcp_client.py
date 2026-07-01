@@ -9,7 +9,14 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_AVIATION_MCP_PYTHON = BASE_DIR / "aviationstack-mcp" / ".venv" / "Scripts" / "python.exe"
+AVIATION_MCP_DIR = BASE_DIR / "aviationstack-mcp"
+WINDOWS_AVIATION_MCP_PYTHON = AVIATION_MCP_DIR / ".venv" / "Scripts" / "python.exe"
+POSIX_AVIATION_MCP_PYTHON = AVIATION_MCP_DIR / ".venv" / "bin" / "python"
+DEFAULT_AVIATION_MCP_PYTHON = (
+    WINDOWS_AVIATION_MCP_PYTHON
+    if WINDOWS_AVIATION_MCP_PYTHON.exists()
+    else POSIX_AVIATION_MCP_PYTHON
+)
 
 TAVILY_API_KEY = (os.getenv("TAVILY_API_KEY") or os.getenv("TAVLIY_API_KEY") or "").strip()
 AVIATIONSTACK_API_KEY = (os.getenv("AVIATIONSTACK_API_KEY") or "").strip()

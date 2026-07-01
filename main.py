@@ -3,9 +3,8 @@ from typing import TypedDict, Annotated
 import operator
 import uuid
 
-import psycopg
 from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.messages import (
     AnyMessage,
     HumanMessage,
@@ -35,6 +34,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+USE_POSTGRES_CHECKPOINTER = os.getenv("USE_POSTGRES_CHECKPOINTER", "").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+CHECKPOINTER_WARNING = ""
 
 llm = ChatGroq(
     model = "llama-3.3-70b-versatile"
@@ -296,14 +301,40 @@ graph.add_edge("weather_agent", "itinerary_agent")
 graph.add_edge("itinerary_agent", END)
 
 
-_conn = psycopg.connect(
-    DATABASE_URL,
-    autocommit = True
-    )
-checkpointer = PostgresSaver(_conn)
-checkpointer.setup()
+def build_checkpointer():
+    global CHECKPOINTER_WARNING
 
-app = graph.compile(checkpointer = checkpointer)
+    if not USE_POSTGRES_CHECKPOINTER:
+        CHECKPOINTER_WARNING = (
+            "Using in-memory LangGraph checkpointing. Set USE_POSTGRES_CHECKPOINTER=true "
+            "with a valid DATABASE_URL to enable Postgres checkpointing."
+        )
+        return MemorySaver()
+
+    if not DATABASE_URL:
+        CHECKPOINTER_WARNING = (
+            "USE_POSTGRES_CHECKPOINTER is enabled, but DATABASE_URL is not set; "
+            "using in-memory LangGraph checkpointing."
+        )
+        return MemorySaver()
+
+    try:
+        import psycopg
+        from langgraph.checkpoint.postgres import PostgresSaver
+
+        conn = psycopg.connect(
+            DATABASE_URL,
+            autocommit=True
+        )
+        checkpointer = PostgresSaver(conn)
+        checkpointer.setup()
+        return checkpointer
+    except Exception as e:
+        CHECKPOINTER_WARNING = f"Postgres checkpointing unavailable; using in-memory checkpointing. Details: {e}"
+        return MemorySaver()
+
+
+app = graph.compile(checkpointer=build_checkpointer())
 
 if __name__ == "__main__":
     config = {
