@@ -131,17 +131,11 @@ async def initialize_mcp():
 
     if search_tool is not None and aviation_tool:
         return
-
-    try:
-        tools = await client.get_tools()
-    except ExceptionGroup as eg:
-        for i, sub in enumerate(eg.exceptions):
-            print(f"\n--- MCP SUB-EXCEPTION {i} ---")
-            print(f"Type: {type(sub).__name__}")
-            print(f"Message: {sub}")
-        raise
+    
+    tools = await client.get_tools()
 
     print("\nAvaiable MCP Tools:\n")
+
     for tool in tools:
         print(tool.name)
 
@@ -168,15 +162,22 @@ async def tavily_mcp_search(query: str):
     return result
 
 
-async def aviation_mcp_call(tool_name: str, tool_args: dict = None):
-    try:
-        tools = await client.get_tools()
-    except ExceptionGroup as eg:
-        for i, sub in enumerate(eg.exceptions):
-            print(f"\n--- MCP SUB-EXCEPTION {i} (aviation_mcp_call) ---")
-            print(f"Type: {type(sub).__name__}")
-            print(f"Message: {sub}")
-        raise
+async def aviation_mcp_call( 
+        tool_name: str,
+        tool_args: dict = None
+):
+    tools = await client.get_tools()
+
+    tool = next(
+        t for t in tools
+        if t.name == tool_name
+    )
+    
+    result = await tool.ainvoke(
+        tool_args or {}
+    )
+
+    return result
 
 
 async def get_airports():
