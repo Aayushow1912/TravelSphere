@@ -301,7 +301,6 @@ graph.add_edge("hotel_agent", "weather_agent")
 graph.add_edge("weather_agent", "itinerary_agent")
 graph.add_edge("itinerary_agent", END)
 
-
 def build_checkpointer():
     global CHECKPOINTER_WARNING
 
@@ -320,14 +319,16 @@ def build_checkpointer():
         return MemorySaver()
 
     try:
-        import psycopg
+        from psycopg_pool import ConnectionPool
         from langgraph.checkpoint.postgres import PostgresSaver
 
-        conn = psycopg.connect(
-            DATABASE_URL,
-            autocommit=True
+        pool = ConnectionPool(
+            conninfo=DATABASE_URL,
+            max_size=5,
+            kwargs={"autocommit": True},
+            check=ConnectionPool.check_connection,  # auto-discards dead connections
         )
-        checkpointer = PostgresSaver(conn)
+        checkpointer = PostgresSaver(pool)
         checkpointer.setup()
         return checkpointer
     except Exception as e:
