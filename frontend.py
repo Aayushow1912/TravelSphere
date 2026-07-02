@@ -20,6 +20,7 @@ def load_streamlit_secrets_to_env():
         "TAVILY_API_KEY",
         "TAVLIY_API_KEY",
         "DATABASE_URL",
+        "USE_POSTGRES_CHECKPOINTER", 
         "OPENWEATHER_API_KEY",
         "AVIATION_MCP_PYTHON",
         "WEATHER_MCP_SCRIPT",
